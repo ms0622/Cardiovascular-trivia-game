@@ -1,0 +1,23 @@
+{
+  "name": "cardiovascular-trivia-game",
+  "version": "1.0.0",
+  "description": "A trivial trivia game wherein groups of students race to answer questions about the cardiovascular system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ms0622/Cardiovascular-trivia-game.git"
+  },
+  "author": "Mishal Saeed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ms0622/Cardiovascular-trivia-game/issues"
+  },
+  "homepage": "https://github.com/ms0622/Cardiovascular-trivia-game#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "ws": "^6.2.1"
+  }
+}

@@ -1,0 +1,45 @@
+body { 
+  font: 16pt Helvetica;
+}
+
+#trivia {
+  display: block;
+}
+
+.question-wrapper {
+  width: 75%;
+  height: 40%;
+  margin: auto;
+  border-radius: 2em;
+  background: #eee;
+  margin-bottom: 1em;
+}
+
+.question {
+  margin: 1em;
+  padding: 1em;
+}
+
+.choices {
+  display: flex;
+  width: 75%;
+  height: 50%;
+  margin: auto;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  border-radius: 2em;
+  background: #eee;
+}
+
+.choice {
+  border: dashed;
+  width: 45%;
+  height: 40%;
+  background: white;
+  border-radius: 1em;
+}
+
+.choice > div {
+  padding: 1em;
+}

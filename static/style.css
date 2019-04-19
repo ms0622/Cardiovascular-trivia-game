@@ -1,5 +1,11 @@
-body { 
-  font: 16pt Helvetica;
+@media (min-width: 736px) {
+  body {
+    font: 16pt Helvetica;
+  }
+
+  .choice {
+    height: 30%;
+  }
 }
 
 #trivia {
@@ -8,7 +14,6 @@ body {
 
 .question-wrapper {
   width: 75%;
-  height: 40%;
   margin: auto;
   border-radius: 2em;
   background: #eee;
@@ -18,12 +23,12 @@ body {
 .question {
   margin: 1em;
   padding: 1em;
+  white-space: pre-line;
 }
 
 .choices {
   display: flex;
   width: 75%;
-  height: 50%;
   margin: auto;
   align-items: center;
   justify-content: space-around;
@@ -33,13 +38,14 @@ body {
 }
 
 .choice {
-  border: dashed;
+  border: 1px solid;
   width: 45%;
-  height: 40%;
+  height: 20%;
   background: white;
   border-radius: 1em;
+  margin: 5px;
 }
 
 .choice > div {
-  padding: 1em;
+  padding: 5px 1em;
 }

@@ -49,3 +49,5 @@
 .choice > div {
   padding: 5px 1em;
 }
+
+#new_game { display: none; }

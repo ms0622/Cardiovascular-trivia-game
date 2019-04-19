@@ -23,6 +23,13 @@ wss.on('connection', function connection(ws) {
 
   ws.on('message', function incoming(message) {
     const json = JSON.parse(message)
+
+    if (json.type == 'new_game') {
+      newGame()
+      sendEveryoneQuestions()
+      return
+    }
+
     const choice = json.choice
     const { correctChoice } = questions[game.questionNumber]
     const correct = correctChoice == choice
@@ -53,11 +60,15 @@ function checkEveryoneAnswered() {
   if (players.every(ws => ws.player.answered)) {
     game.questionNumber++
     if (game.questionNumber == questions.length) game.finished = true
-    players.forEach(ws => {
-      ws.player.answered = false
-      sendQuestion(ws)
-    })
+    sendEveryoneQuestions()
   }
+}
+
+function sendEveryoneQuestions() {
+  players.forEach(ws => {
+    ws.player.answered = false
+    sendQuestion(ws)
+  })
 }
 
 function sendQuestion(ws) {
@@ -68,7 +79,7 @@ function sendQuestion(ws) {
 
   const index = game.questionNumber
   const question = questions[index]
-  ws.send(JSON.stringify({
+  const resp = {
     type: 'question',
     gameOver: false,
     question: {
@@ -77,7 +88,10 @@ function sendQuestion(ws) {
       funfact: question.funfact
     },
     id: index
-  }))
+  }
+  if (players[0] == ws) resp.owner = true
+
+  ws.send(JSON.stringify(resp))
 }
 
 app.use('/', express.static('static'))
@@ -114,4 +128,8 @@ function newGame() {
   game.questionNumber = 0
   game.finished = false
   game.running = true
+  players.forEach(p => {
+    p.score = 0
+    p.answered = false
+  })
 }

@@ -5,7 +5,10 @@ const choices = ['A', 'B', 'C', 'D']
 let answering = false
 let owner = false
 
-const ws = new WebSocket(`wss://${location.hostname}/quiz-socket`)
+const wsAddress = location.protocol == 'http:' ?
+  `ws://${location.hostname}:8080` :
+  `wss://${location.hostname}/quiz-socket`
+const ws = new WebSocket(wsAddress)
 ws.onmessage = message => {
   const json = JSON.parse(message.data)
   if (json.type == 'question') {

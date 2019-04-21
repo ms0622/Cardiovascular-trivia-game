@@ -5,17 +5,16 @@ const bodyParser = require('body-parser')
 const WebSocket = require('ws')
 const wss = new WebSocket.Server({ port: 8080 })
 const game = {running: false}
-const players = []
 
 function noop() {}
+let questionTimer
 
 wss.on('connection', function connection(ws) {
+  if (wss.clients.size == 1) ws.send(JSON.stringify({type: 'owner'}))
   if (!game.running) newGame()
 
   ws.player = {score: 0, answered: false}
   ws.isAlive = true
-  players.push(ws)
-  sendQuestion(ws)
 
   ws.on('pong', data => {
     ws.isAlive = true
@@ -44,10 +43,10 @@ wss.on('connection', function connection(ws) {
 })
 
 setInterval(() => {
-  players.forEach(ws => {
+  wss.clients.forEach(ws => {
     if (!ws.isAlive) {
-      const index = players.findIndex(p => p == ws)
-      players.splice(index, 1)
+      const index = wss.clients.findIndex(p => p == ws)
+      ws.terminate()
       console.log(`Removed player ${index}`)
     }
 
@@ -56,32 +55,38 @@ setInterval(() => {
   })
 }, 10000)
 
-function checkEveryoneAnswered() {
-  if (players.every(ws => ws.player.answered)) {
+function checkEveryoneAnswered(timeLimitReached) {
+  if (timeLimitReached || Array.from(wss.clients).every(ws => ws.player.answered)) {
+    clearTimeout(questionTimer)
     game.questionNumber++
-    if (game.questionNumber == questions.length) game.finished = true
-    sendEveryoneQuestions()
+    if (game.questionNumber == questions.length) {
+      game.finished = true
+      wss.clients.forEach(ws => {
+        const obj = {
+          type: 'game_over',
+          score: ws.player.score
+        }
+        ws.send(JSON.stringify(obj))
+    })
+    } else {
+      sendEveryoneQuestions()
+    }
   }
 }
 
 function sendEveryoneQuestions() {
-  players.forEach(ws => {
+  wss.clients.forEach(ws => {
     ws.player.answered = false
     sendQuestion(ws)
   })
+  questionTimer = setTimeout(() => checkEveryoneAnswered(true), 30000)
 }
 
 function sendQuestion(ws) {
-  if (game.finished) {
-    ws.send(JSON.stringify({type: 'question', gameOver: true, score: ws.player.score}))
-    return
-  }
-
   const index = game.questionNumber
   const question = questions[index]
   const resp = {
     type: 'question',
-    gameOver: false,
     question: {
       q: question.q,
       choices: question.choices,
@@ -89,20 +94,16 @@ function sendQuestion(ws) {
     },
     id: index
   }
-  if (players[0] == ws) resp.owner = true
 
   ws.send(JSON.stringify(resp))
 }
 
-app.use('/', express.static('static'))
+app.use('/quiz', express.static('static'))
 app.use(bodyParser.json())
-app.listen(3000, _ => console.log('ready'))
+app.listen(3001, _ => console.log('ready'))
 
 const questions = require('./questions.js')
 questions.forEach(q => q.correctChoice = 0)
-
-app.post('/answer', (req, resp) => {
-})
 
 function randomizeQuestions() {
   questions.forEach(question => {
@@ -128,7 +129,7 @@ function newGame() {
   game.questionNumber = 0
   game.finished = false
   game.running = true
-  players.forEach(p => {
+  wss.clients.forEach(p => {
     p.score = 0
     p.answered = false
   })
